@@ -1,5 +1,5 @@
 # David Wong  4/3/19
-# 7/05/19 - Added TaggedCount and GroupCount of servers. Removed ALEGroups from report.
+# 7/09/19 - Added TaggedCount and GroupCount of servers. Removed ALEGroups from report.
 # 4/24/19 - Added SendMail
 # 4/08/19 - Added tagging option and logging.
 #  Can be used with Task Scheduler, but need a service account with rights to DDC and AD. 
@@ -30,16 +30,16 @@ function SendMail
 	
 function TagServersinGroup
 {
-Param(
+	Param(
 	[Parameter(Mandatory=$True)]
 	[string]$ADGroupname)
 	
-$DateTime = Get-Date -Format g
-$WhoDidIt=$env:username
+	$DateTime = Get-Date -Format g
+	$WhoDidIt=$env:username
 
-if (!(Test-Path $ReportLoc`\TagLogs)){New-Item -ItemType Directory -Path $ReportLoc`\TagLogs -Force}
-# --------------------------------------------------------------
-# Read Servers in ADGroup and tag them in Citrix
+	if (!(Test-Path $ReportLoc`\TagLogs)){New-Item -ItemType Directory -Path $ReportLoc`\TagLogs -Force}
+	# --------------------------------------------------------------
+	# Read Servers in ADGroup and tag them in Citrix
 	# Get Servers Tagged with ADGroupname
 	$ServerTagged = Group-BrokerMachine -Tag $ADGroupname -Property HostedMachineName | select name
 	# Get Servers in ADGroupname
@@ -50,54 +50,54 @@ if (!(Test-Path $ReportLoc`\TagLogs)){New-Item -ItemType Directory -Path $Report
 	$ServerinGroupList = New-Object system.Collections.ArrayList
     
 	#  Add Servers to Arraylist
-    foreach ($Server in $ServerTagged.name){$ServerTaggedList.add($Server) | Out-Null}
+	foreach ($Server in $ServerTagged.name){$ServerTaggedList.add($Server) | Out-Null}
 	
 	#  Add Servers to Arraylist
-    foreach ($Server in $ServerinGroup.name){$ServerinGroupList.add($Server) | Out-Null}
+	foreach ($Server in $ServerinGroup.name){$ServerinGroupList.add($Server) | Out-Null}
 	
 	$TaggedNotIngroup = $ServerTaggedList | Where-Object {$ServerinGroupList -notcontains $_}
 	$IngroupNotTagged = $ServerinGroupList | Where-Object {$ServerTaggedList -notcontains $_} 
 		
 	# Untag Servers that are not in ADGroup
-    if ($TaggedNotIngroup)
-    {
-        write-host "Untagging $ADGroupname from...." -ForegroundColor Yellow
+	if ($TaggedNotIngroup)
+	{
+        	write-host "Untagging $ADGroupname from...." -ForegroundColor Yellow
 		foreach ($Server in $TaggedNotIngroup)
 		{
-			Write-host "$Server" -ForegroundColor Green
-			"Remove $Server, $DateTime, $WhoDidIt" | Out-File $ReportLoc`\TagLogs\$ADGroupname`_Tag.txt -Append
-			Remove-BrokerTag -Name $ADGroupname -Machine domain\$Server
+		    Write-host "$Server" -ForegroundColor Green
+		    "Remove $Server, $DateTime, $WhoDidIt" | Out-File $ReportLoc`\TagLogs\$ADGroupname`_Tag.txt -Append
+		    Remove-BrokerTag -Name $ADGroupname -Machine domain\$Server
 		}
-    }
+	}
 
 	# if Tag doesn't exist and Servers in ADGroup, create the Tag
 	$AllTags = (Get-BrokerTag).Name
-    if (($AllTags -notcontains $ADGroupname) -And $IngroupNotTagged)
-    {
+	if (($AllTags -notcontains $ADGroupname) -And $IngroupNotTagged)
+	{
 		Write-host "$ADGroupname Tag created"
 		New-BrokerTag $ADGroupname | Out-Null
 	}
 	
-    # Tag Servers that are in the AppGroup
-    if ($IngroupNotTagged)
-    {	# Get list of servers in Machine Catalog
-        $Machines = Group-BrokerMachine -property HostedMachineName | select Name
+	# Tag Servers that are in the AppGroup
+	if ($IngroupNotTagged)
+   	{	# Get list of servers in Machine Catalog
+   		$Machines = Group-BrokerMachine -property HostedMachineName | select Name
         
-        Write-host "Tagging $ADGroupname to...." -ForegroundColor Yellow
+		Write-host "Tagging $ADGroupname to...." -ForegroundColor Yellow
 		foreach ($Server in $IngroupNotTagged)
 		{	# Tag Server
-            if ($Machines.Name -contains $Server)
-            {
+            		if ($Machines.Name -contains $Server)
+            		{
 			    Write-host "$Server" -ForegroundColor Green
 				"Add $Server, $DateTime, $WhoDidIt" | Out-File $ReportLoc`\TagLogs\$ADGroupname`_Tag.txt -Append
 			    Add-BrokerTag -Name $ADGroupname -Machine domain\$Server
-            }
-            else
-            {	# if Server is not in a Machine Catalog, show error
-                Write-host "** Error ** $Server is not in a Machine Catalog" -ForegroundColor Red
-            }
+            		}
+            		else
+            		{	# if Server is not in a Machine Catalog, show error
+                		Write-host "** Error ** $Server is not in a Machine Catalog" -ForegroundColor Red
+            		}
 		}
-    }
+	}
 }
 
 ######## START ########
@@ -145,34 +145,34 @@ foreach ($AppTag in $RestrictToTags.Name)
 	# Building Properties for each application group
 	$Appgroup.Clear()
 	$DesktopGroup.Clear()
-    $AppsinGroup.Clear()	
+	$AppsinGroup.Clear()	
 	
 	# Get the Groupname from uid
-    foreach ($AppGroupName in $AppGroupNames)
-    {
+	foreach ($AppGroupName in $AppGroupNames)
+    	{
 		if ($AppGroupName.RestrictToTag -eq $AppTag)
 		{
 			$Appgroup.add($AppGroupName.Name) | Out-Null
 			# Get the DesktopGroup from uid
-            $DTG = $AppGroupName.AssociatedDesktopGroupUids
-            foreach ($D in $DTG)
-            {
+            		$DTG = $AppGroupName.AssociatedDesktopGroupUids
+            		foreach ($D in $DTG)
+            		{
 			    $DesktopGroup.add((Get-BrokerDesktopgroup -uid $D).Name) | Out-Null
-            }
+            		}
 			# Get Apps in AppGroup
-            foreach ($App in $Apps)
-            {
-                if ($app.AssociatedApplicationGroupUids -eq $Appgroupname.uid){$AppsinGroup.add($App.Name) | Out-Null}
-            }
+            		foreach ($App in $Apps)
+            		{
+                		if ($app.AssociatedApplicationGroupUids -eq $Appgroupname.uid){$AppsinGroup.add($App.Name) | Out-Null}
+            		}
 		}
-    }
+	}
 
 	# Get Tagged Servers
 	$MachinesTagged = $null
 	$MachinesTagged = (Group-BrokerMachine -Tag $AppTag -Property HostedMachineName).name | sort
 	if ($MachinesTagged){$MachinesTaggedCount = $MachinesTagged.Count}else{$MachinesTaggedCount = "NA"}
 	
-    # Get membersof the CTX-SER group
+    	# Get membersof the CTX-SER group
 	$GroupExist = $SERGroups | Where {$_.Name -eq $AppTag}
 	if ($GroupExist)
 	{
@@ -187,10 +187,10 @@ foreach ($AppTag in $RestrictToTags.Name)
 		# Compare Tagged Servers and Servers in CTX-SER group to see if matched.
 		$ServersMatch = "True"
 		foreach ($machine in $MachinesTagged)
-		{if ($Servers -notcontains $machine){$ServersMatch = "False"}}
+		    {if ($Servers -notcontains $machine){$ServersMatch = "False"}}
 	
 		foreach ($server in $servers)
-		{if ($MachinesTagged -notcontains $Server){$ServersMatch = "False"}}
+		    {if ($MachinesTagged -notcontains $Server){$ServersMatch = "False"}}
 	
 		if ($ServersMatch -eq "False"){$AppTagServersNotMatched.add($AppTag) | Out-Null }
 	}
@@ -204,15 +204,15 @@ foreach ($AppTag in $RestrictToTags.Name)
 	
 	$Properties = @{
 		RestrictToTag = $AppTag
-        AppGroup = $AppGroup -join ', '
+        	AppGroup = $AppGroup -join ', '
 		DeliveryGroup = $DesktopGroup -join ', '
-        Applications = $AppsinGroup -join ', '
+        	Applications = $AppsinGroup -join ', '
 		ALEGroups = $ALEGroups -join ', '
-        ServersTagged = $MachinesTagged -join ', '
+        	ServersTagged = $MachinesTagged -join ', '
 		ServersInGroup = $Servers -join ', '
 		GroupCount = $ServersInGroupCount
 		TaggedCount = $MachinesTaggedCount
-        ServersMatch = $ServersMatch
+        	ServersMatch = $ServersMatch
 	}
 	
 	# Store results for export
@@ -254,7 +254,7 @@ if ($AppTagServersNotMatched)
 	if (($Answer2 -eq 'Y') -or ($ReTag -eq "True"))
 	{
 		foreach($NotMatched in $AppTagServersNotMatched)
-			{TagServersinGroup $NotMatched}
+		    {TagServersinGroup $NotMatched}
 	}
 }
 

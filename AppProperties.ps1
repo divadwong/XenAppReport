@@ -28,21 +28,21 @@ Write-host "Processing .... "
 foreach ($App in $AllApps)
 {
 	$App.PublishedName
-    $AppGroup.Clear()
+    	$AppGroup.Clear()
 	$RestrictToTag.Clear()
 	$DesktopGroup.Clear()
 
-    # Get the AppGroupname from uid
+    	# Get the AppGroupname from uid
 	$AG = $App.AssociatedApplicationGroupUids
-    if ($AG)
-    {
-        foreach ($A in $AG)
-        {
-            $GetAG = Get-BrokerApplicationGroup -uid $A
-			$AppGroup.add($GetAG.Name) | Out-Null
-			$RestrictToTag.add($GetAG.RestrictToTag) | Out-Null
-        }
-    }
+	if ($AG)
+	{
+           foreach ($A in $AG)
+           {
+        	$GetAG = Get-BrokerApplicationGroup -uid $A
+		$AppGroup.add($GetAG.Name) | Out-Null
+		$RestrictToTag.add($GetAG.RestrictToTag) | Out-Null
+           }
+    	}
 
     # Get the DesktopGroupname from uid
     $DG = $App.AllAssociatedDesktopGroupUIDs
@@ -50,7 +50,7 @@ foreach ($App in $AllApps)
     {
         foreach ($D in $DG)
         {
-			$DesktopGroup.add((Get-BrokerDesktopgroup -uid $D).Name) | Out-Null
+		$DesktopGroup.add((Get-BrokerDesktopgroup -uid $D).Name) | Out-Null
         }
     }
 	
@@ -61,7 +61,7 @@ foreach ($App in $AllApps)
 		$Properties = @{
 			Name = $app.Name
 			ApplicationName = $app.ApplicationName
-            PublishedName = $app.PublishedName
+            		PublishedName = $app.PublishedName
 			CommandLineExecutable = $app.CommandLineExecutable
 			CommandLineArguments = $app.CommandLineArguments
 			WorkingDirectory = $app.WorkingDirectory
@@ -72,12 +72,12 @@ foreach ($App in $AllApps)
 			UserFilterEnabled = $app.UserFilterEnabled
 			#Visible = $app.Visible
 			Visibility = $AssociatedUserFullNames -join ', '
-            ApplicationGroup = $AppGroup -join ', '
+           		ApplicationGroup = $AppGroup -join ', '
 			RestrictToTag = $RestrictToTag -join ', '
 			DeliveryGroup = $DesktopGroup -join ', '
         }
 	#Store results for export	
-    $Results += New-Object psobject -Property $properties
+    	$Results += New-Object psobject -Property $properties
 }
 
 # Exporting results

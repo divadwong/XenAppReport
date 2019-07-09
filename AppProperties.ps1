@@ -1,5 +1,5 @@
 # David Wong
-# Updated 7/05/19
+# Updated 7/09/19
 # Create a report of the Applications and Properties on a XenApp Server.
 	
 # Adding Citrix Snapins

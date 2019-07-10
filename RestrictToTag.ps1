@@ -224,7 +224,7 @@ Write-host "Exporting CSV file to $ReportLoc\$Filename"
 
 # Show Server mismatch was found.
 $ShowNotMatched = $AppTagServersNotMatched -join "`n"
-if ($AppTagServersNotMatched){write-host "Servers Tagged and Servers in ADGroup mismatch detected`n $ShowNotMatched" -foregroundcolor Red}
+if ($AppTagServersNotMatched){write-host "Servers Tagged and Servers in ADGroup mismatch detected" -foregroundcolor Red}
 
 $results | select-Object RestrictToTag, AppGroup, DeliveryGroup, Applications, TaggedCount, ServersTagged, GroupCount, ServersInGroup, ServersMatch | Sort RestrictToTag |
  export-csv -Path $ReportLoc\$Filename -NoTypeInformation
@@ -258,6 +258,6 @@ if ($AppTagServersNotMatched)
 	}
 }
 
-if ($Answer1 -eq "Y" -or $Answer2 -eq "Y"){Read-Host -Prompt "Hit Enter to Exit"}
-else
-{Start-Sleep -s 5}
+if ($ReTag -eq "null"){Read-Host -Prompt "Hit Enter to Exit"}
+	else
+{Start-Sleep -s 3}

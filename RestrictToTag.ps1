@@ -121,6 +121,7 @@ if (!(Test-Path $ReportLoc)){write-host "Creating $Reportloc";New-Item -ItemType
 
 # Get all apps on DDC
 $Apps = Get-BrokerApplication -AdminAddress $DDCServer
+if (!($Apps)){write-host "ERROR: Rights to XenApp Server and Citrix Powershell Snap-in are pre-requisites to run this script";Start-Sleep -s 10;Exit}
 # Get all application groups on DDC
 $AppGroupNames = Get-BrokerApplicationGroup
 # Get all Tags on DDC starting with CTX-SER

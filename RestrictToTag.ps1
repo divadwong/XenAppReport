@@ -119,10 +119,6 @@ $FileDateTime = $FileDateTime[0..12] -join ''
 $Filename =  "RestrictToTag_" + $DDCEnv + "_" + $FileDatetime + ".csv"
 if (!(Test-Path $ReportLoc)){write-host "Creating $Reportloc";New-Item -ItemType Directory -Path $ReportLoc -Force}
 
-# Set $UI variable
-$WhoDidIt=$env:username
-if ($WhoDidIt -like "*$"){$UI = $false}else{$UI = $true}
-
 # Get all apps on DDC
 $Apps = Get-BrokerApplication -AdminAddress $DDCServer
 # Get all application groups on DDC

@@ -18,6 +18,7 @@ $Filename = "AppProperties_" + $DDCEnv + "_" + $FileDateTime + ".csv"
 if (!(Test-Path $ReportLoc)){New-Item -ItemType Directory -Path $ReportLoc -Force}
 
 $AllApps = Get-BrokerApplication -AdminAddress $DDCServer | Sort name
+if (!($AllApps)){write-host "ERROR: Rights to XenApp Server and Citrix Powershell Snap-in are pre-requisites to run this script";Read-Host -Prompt "Hit Enter to Exit";Exit}
 
 $Results = @()
 $AppGroup = New-Object system.Collections.ArrayList
